@@ -1,9 +1,9 @@
 mod ia;
 
 use ia::IABot;
-use inquire::{Text, Select};
+use inquire::Select;
 use spinners::{Spinner, Spinners};
-use std::str::FromStr;
+use std::{str::FromStr, env};
 use tracing_subscriber::{EnvFilter,
     layer::SubscriberExt, util::SubscriberInitExt};
 use tracing::{info, error};
@@ -16,51 +16,46 @@ async fn main() {
         .with(EnvFilter::from_str(iabot.get_log_level()).unwrap())
         .with(tracing_subscriber::fmt::layer())
         .init();
-    let question = Text::new("Di:").prompt();
-    match question{
-        Ok(question) => {
-            info!("Question: {}", question);
-            let mut spinner = Spinner::new(Spinners::Dots9, "🤔".to_string());
-            match iabot.ask(&question).await{
-                Ok (command) => {
-                    spinner.stop();
-                    info!("Command: {}", &command);
-                    let ans = Select::new(
-                        &format!("Ejecuto '{}'?", &command),
-                        vec!["Si", "No"]).prompt();
-                    match ans{
-                        Ok(seleccion) => {
-                            if seleccion == "Si" {
-                                let mut process: Process = command
-                                    .split(" ")
-                                    .collect::<Vec<&str>>()
-                                    .into();
-                                let outputs = process.spawn_and_stream()
-                                    .unwrap()
-                                    .collect::<Vec<_>>()
-                                    .await;
-                                println!("Resultado: {outputs:#?}");
-                            }else{
-                                println!("Otra vez será");
-                            }
-                        },
-                        Err(e) => {
-                            println!("Algo ha pasado, elige de nuevo");
-                            error!("{}", e)
-                        }
-                    };
+    let question = env::args().collect::<Vec<_>>()[1..].join(" ");
+    info!("Question: {}", question);
+    let mut spinner = Spinner::new(Spinners::Dots9, "🤔".to_string());
+    match iabot.ask(&question).await{
+        Ok (command) => {
+            info!("Command: {}", &command);
+            spinner.stop();
+            let ans = Select::new(
+                &format!("Ejecuto '{}'?", &command),
+                vec!["Si", "No"]).prompt();
+            match ans{
+                Ok(seleccion) => {
+                    if seleccion == "Si" {
+                        let args = command.split(" ").collect::<Vec<_>>();
+                        let output = if args.len() >1 {
+                            std::process::Command::new(&args[1])
+                                .args(&args[2..])
+                                .output()
+                                .expect("Error");
+                        }else{
+                            std::process::Command::new(&args[1])
+                                .output()
+                                .expect("Error");
+
+                        };
+                        println!("{:?}", output);
+                    }else{
+                        println!("Otra vez será");
+                    }
                 },
                 Err(e) => {
-                    error!("Error: {}", e);
-                    spinner.stop_with_message(format!("No se: {}", e));
+                    println!("Algo ha pasado, elige de nuevo");
+                    error!("{}", e)
                 }
-            }
-            spinner.stop_with_message("Esta es la respuesta: ".to_string());
+            };
         },
         Err(e) => {
-            println!("No se que ha pasado, repite, porfa");
             error!("Error: {}", e);
+            spinner.stop_with_message(format!("No se: {}", e));
         }
-
     }
+    spinner.stop_with_message("Esta es la respuesta: ".to_string());
 }
