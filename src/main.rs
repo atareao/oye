@@ -6,8 +6,7 @@ use spinners::{Spinner, Spinners};
 use std::{str::FromStr, env};
 use tracing_subscriber::{EnvFilter,
     layer::SubscriberExt, util::SubscriberInitExt};
-use tracing::{info, error};
-use process_stream::{Process, ProcessExt, StreamExt};
+use tracing::{debug, info, error};
 
 #[tokio::main]
 async fn main() {
@@ -30,17 +29,15 @@ async fn main() {
                 Ok(seleccion) => {
                     if seleccion == "Si" {
                         let args = command.split(" ").collect::<Vec<_>>();
-                        let output = if args.len() >1 {
-                            std::process::Command::new(&args[1])
-                                .args(&args[2..])
-                                .output()
-                                .expect("Error");
-                        }else{
-                            std::process::Command::new(&args[1])
-                                .output()
-                                .expect("Error");
-
-                        };
+                        debug!("{:?}", args);
+                        let mut command = tokio::process::Command::new(&args[0]);
+                        if args.len() > 1{
+                            command.args(&args[1..]);
+                        }
+                        debug!("Command: {:?}", command);
+                        let mut child = command.spawn().unwrap();
+                        child.wait().await.unwrap();
+                        let output = child.stdout.take().unwrap();
                         println!("{:?}", output);
                     }else{
                         println!("Otra vez será");
