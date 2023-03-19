@@ -18,18 +18,18 @@ async fn main() {
         .init();
     let question = env::args().collect::<Vec<_>>()[1..].join(" ");
     info!("Question: {}", question);
-    let mut spinner = Spinner::new(Spinners::Dots9, "🤔".to_string());
+    let mut spinner = Spinner::new(Spinners::Dots9, "🤔  ".to_string());
     match iabot.ask(&question).await{
         Ok (command) => {
             spinner.stop();
             info!("Command: {}", &command);
             let ans = Select::new(
-                &format!("Ejecuto '{}'?", &command.red()),
-                vec!["Si".red(), "No".blue()]).prompt();
+                &format!("¿Ejecuto {}?", &command.red()),
+                vec!["Si".green(), "No".blue()]).prompt();
             match ans{
                 Ok(seleccion) => {
-                    if seleccion == "Si".red() {
-                        let mut spinner = Spinner::new(Spinners::Dots9, "".to_string());
+                    if seleccion == "Si".green() {
+                        let mut spinner = Spinner::new(Spinners::Dots9, String::new());
                         let args = command.split(" ").collect::<Vec<_>>();
                         debug!("{:?}", args);
                         let mut command = tokio::process::Command::new(&args[0]);
@@ -42,7 +42,7 @@ async fn main() {
                         debug!("Response: {:?}", response);
                         // child.wait().await.unwrap();
                         // let output = child.stdout.take().unwrap();
-                        spinner.stop();
+                        spinner.stop_with_newline();
                         println!("{}", std::str::from_utf8(&response.stdout)
                             .unwrap());
                     }else{
