@@ -7,6 +7,7 @@ use std::{str::FromStr, env};
 use tracing_subscriber::{EnvFilter,
     layer::SubscriberExt, util::SubscriberInitExt};
 use tracing::{debug, info, error};
+use colored::Colorize;
 
 #[tokio::main]
 async fn main() {
@@ -20,14 +21,15 @@ async fn main() {
     let mut spinner = Spinner::new(Spinners::Dots9, "🤔".to_string());
     match iabot.ask(&question).await{
         Ok (command) => {
-            info!("Command: {}", &command);
             spinner.stop();
+            info!("Command: {}", &command);
             let ans = Select::new(
-                &format!("Ejecuto '{}'?", &command),
-                vec!["Si", "No"]).prompt();
+                &format!("Ejecuto '{}'?", &command.red()),
+                vec!["Si".red(), "No".blue()]).prompt();
             match ans{
                 Ok(seleccion) => {
-                    if seleccion == "Si" {
+                    if seleccion == "Si".red() {
+                        let mut spinner = Spinner::new(Spinners::Dots9, "".to_string());
                         let args = command.split(" ").collect::<Vec<_>>();
                         debug!("{:?}", args);
                         let mut command = tokio::process::Command::new(&args[0]);
@@ -35,24 +37,27 @@ async fn main() {
                             command.args(&args[1..]);
                         }
                         debug!("Command: {:?}", command);
-                        let mut child = command.spawn().unwrap();
-                        child.wait().await.unwrap();
-                        let output = child.stdout.take().unwrap();
-                        println!("{:?}", output);
+                        let response = command.output().await.unwrap();
+                        // let mut child = command.spawn().unwrap();
+                        debug!("Response: {:?}", response);
+                        // child.wait().await.unwrap();
+                        // let output = child.stdout.take().unwrap();
+                        spinner.stop();
+                        println!("{}", std::str::from_utf8(&response.stdout)
+                            .unwrap());
                     }else{
-                        println!("Otra vez será");
+                        println!("{}", "Otra vez será".blue());
                     }
                 },
                 Err(e) => {
-                    println!("Algo ha pasado, elige de nuevo");
-                    error!("{}", e)
+                    println!("{}", "Algo ha pasado, elige de nuevo".red());
+                    error!("{}", e);
                 }
             };
         },
         Err(e) => {
+            spinner.stop();
             error!("Error: {}", e);
-            spinner.stop_with_message(format!("No se: {}", e));
         }
     }
-    spinner.stop_with_message("Esta es la respuesta: ".to_string());
 }
