@@ -43,8 +43,16 @@ async fn main() {
                         // child.wait().await.unwrap();
                         // let output = child.stdout.take().unwrap();
                         spinner.stop_with_newline();
-                        println!("{}", std::str::from_utf8(&response.stdout)
-                            .unwrap());
+                        let output = if response.status.success(){
+                            std::str::from_utf8(&response.stdout).unwrap().blue()
+                        }else{
+                            std::str::from_utf8(&response.stderr).unwrap().red()
+                        };
+                        if output.is_empty(){
+                            println!("{}", "No hay nada!".yellow());
+                        }else{
+                            println!("{}", output);
+                        }
                     }else{
                         println!("{}", "Otra vez será".blue());
                     }
