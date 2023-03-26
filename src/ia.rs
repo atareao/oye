@@ -65,7 +65,7 @@ impl IABot{
         match config_dir(){
             Some(dir) => {
                 config_file.push(dir);
-                config_file.push("eh");
+                config_file.push("oye");
                 if(tokio::fs::metadata(&config_file)).await.is_ok() == false{
                     let _ = tokio::fs::create_dir_all(&config_file).await;
                 }
