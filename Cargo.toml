@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>"]
 homepage = "https://atareao.es"
 readme = "README.md"
+description = "A simple, lightweight app to use OpenAI's chatGPT from the terminal'"
 repository = "https://github.com/atareao/eh"
 license = "MIT"
 license-file = "LICENSE"
