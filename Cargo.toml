@@ -34,3 +34,4 @@ dirs = "4.0"
 spinners = "4.1"
 colored = "2"
 inquire = "0.6"
+clap = { version = "4.2.1", features = ["derive"] }
