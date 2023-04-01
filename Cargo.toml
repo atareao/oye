@@ -16,9 +16,9 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 tokio = { version = "1.26", features = ["full"] }
-process-stream = "0.3"
 
-reqwest = { version = "0.11", features = ["json", "rustls-tls-native-roots"] }
+hyper = { version = "0.14", features = ["full"] }
+hyper-rustls = "0.23"
 
 # Yaml
 serde_yaml = "0.9"
@@ -34,4 +34,4 @@ dirs = "4.0"
 spinners = "4.1"
 colored = "2"
 inquire = "0.6"
-clap = { version = "4.2.1", features = ["derive"] }
+# clap = { version = "4.2.1", features = ["derive"] }
