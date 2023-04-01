@@ -1,6 +1,6 @@
 [package]
 name = "oye"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>"]
 homepage = "https://atareao.es"
