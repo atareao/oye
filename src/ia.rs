@@ -26,7 +26,6 @@ impl IABotError{
 // Display implementation is required for std::error::Error.
 impl fmt::Display for IABotError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        //write!(f, "Address is localhost")
         write!(f, "{}", self.message)
     }
 }
